@@ -1,0 +1,35 @@
+input = readlines("./05/input.txt")
+
+lines = zeros(Int64, length(input), 4)
+
+for (i, line) in enumerate(input)
+    coordinates = split(line, " -> ")
+    x1, y1 = parse.(Int, split(coordinates[1], ","))
+    x2, y2 = parse.(Int, split(coordinates[2], ","))
+
+    lines[i, :] = [x1, y1, x2, y2] .+ 1
+end
+
+floor = zeros(Int64, maximum(lines[:, [2, 4]]), maximum(lines[:, [1, 3]]))
+
+for l in eachrow(lines)
+    if l[1] == l[3]
+        x = l[1]
+        y = l[2] < l[4] ? (l[2]:l[4]) : (l[4]:l[2])
+        floor[y, x] .+= 1
+    elseif l[2] == l[4]
+        y = l[2]
+        x = l[1] < l[3] ? (l[1]:l[3]) : (l[3]:l[1])
+        floor[y, x] .+= 1
+    else
+        x = l[1] < l[3] ? range(l[1], l[3]; step=1) : range(l[1], l[3]; step=-1)
+        y = l[2] < l[4] ? range(l[2], l[4]; step=1) : range(l[2], l[4]; step=-1)
+        for idx in map(i -> [i...], zip(x, y))
+            floor[idx[2], idx[1]] += 1
+        end
+    end
+end
+
+overlaps = sum(floor .>= 2)
+
+println("Number of overlaps: $overlaps")
